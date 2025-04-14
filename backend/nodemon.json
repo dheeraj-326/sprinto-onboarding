@@ -2,4 +2,4 @@
   "watch": ["."],
   "ext": ".js",
   "ignore": ["node_modules"]
-} 
+}
