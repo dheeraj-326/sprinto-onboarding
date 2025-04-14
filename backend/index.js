@@ -30,7 +30,7 @@ import { fileURLToPath } from 'url';
 import path from 'path';
 console.log(import.meta.url); // file:///home
 init();
-startServer();
+await startServer();
 
 // import.meta.url of the main module is the entry file
  // safest way

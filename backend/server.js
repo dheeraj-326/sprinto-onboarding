@@ -30,16 +30,24 @@ async function startServer() {
         const url = `http://${process.env.HOST}:${process.env.PORT}`;
         await server.listen();
         app.use('/graphql', express.json(), expressMiddleware(server));
-        app.get('/graphql', graphqlPlayground.default({
-            endpoint: '/playground',
-        }));
-        app.listen({ port: process.env.PORT }, () =>
+        const appServer = app.listen({ port: process.env.PORT }, () =>
             console.log(`🚀 Server ready at ${url}`)
         );
+
+        const shutdown = async () => {
+            console.log('Shuttong down server');
+            appServer.close(async () => {
+                console.log('Express server stopped');
+                await sequelize.close();
+                console.log('Sequelize closed');
+            })
+        }
+
+        process.on('SIGTERM', shutdown);
+        process.on('SIGINT', shutdown);
+        
     } catch (error) {
         console.error("Error while initializing server: ", error);
-    } finally {
-        await sequelize.close();
     }
 }
 
