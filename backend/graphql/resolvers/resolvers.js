@@ -26,6 +26,18 @@ export const resolvers = {
     }
   },
   Mutation: {
+    editBook: async (parent, args) => {
+      const bookInput = args.book;
+      let book = await Book.findByPk(bookInput.id);
+      if (book === null) {
+        throw new Error(`Book with id ${book.id} not found`);
+      }
+      book.title = bookInput.title;
+      book.description = bookInput.description;
+      book.published_date = bookInput.published_date;
+      await book.save();
+      return book;
+    },
     createBook: async (parent, args) => {
       const bookInput = args.book;
       const authorInput = bookInput.author;

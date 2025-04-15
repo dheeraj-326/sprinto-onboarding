@@ -1,4 +1,4 @@
-import { gql } from 'apollo-server';
+import { gql } from 'graphql-tag';
 
 export const typeDefs = gql`
   scalar DateTime
@@ -25,11 +25,18 @@ export const typeDefs = gql`
     born_date: DateTime
   }
 
-  input BookInput {
+  input BookCreateInput {
     title: String!
     description: String
     published_date: DateTime!
     author: AuthorInput!
+  }
+
+  input BookEditInput {
+    id: String
+    title: String!
+    description: String
+    published_date: DateTime!
   }
 
   type Query {
@@ -39,6 +46,7 @@ export const typeDefs = gql`
   }
 
   type Mutation {
-    createBook(book: BookInput!): Book!
+    createBook(book: BookCreateInput!): Book!
+    editBook(book: BookEditInput!): Book!
   }
 `;

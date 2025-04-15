@@ -1,5 +1,4 @@
-
-import { ApolloServer } from 'apollo-server';
+import { ApolloServer } from '@apollo/server';
 import { typeDefs } from './graphql/schemas/schema.js';
 import { resolvers } from './graphql/resolvers/resolvers.js';
 import getSequelize from "./dao/pgsql.js";
@@ -7,6 +6,7 @@ import { initTables } from "./dao/models.js";
 import { expressMiddleware } from '@apollo/server/express4';
 import graphqlPlayground from 'graphql-playground-middleware-express';
 import express from 'express';
+import cors from 'cors';
 // Load environment variables
 
 async function startServer() {
@@ -28,14 +28,17 @@ async function startServer() {
         }
         await initTables();
         const url = `http://${process.env.HOST}:${process.env.PORT}`;
-        await server.listen();
+        await server.start();
+        app.use(cors({
+            origin: 'http://localhost:3001'
+        }));
         app.use('/graphql', express.json(), expressMiddleware(server));
         const appServer = app.listen({ port: process.env.PORT }, () =>
             console.log(`🚀 Server ready at ${url}`)
         );
 
         const shutdown = async () => {
-            console.log('Shuttong down server');
+            console.log('Shutting down server');
             appServer.close(async () => {
                 console.log('Express server stopped');
                 await sequelize.close();

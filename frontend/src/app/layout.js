@@ -43,6 +43,7 @@ export default function RootLayout({ children }) {
             </nav>
             <div className="flex flex-col w-full bg-gray-200">
               <header className="shadow p-2 bg-gray-100 text-left">
+              <p className="flex text-4xl justify-center">Books CRUD</p>
                   <p className="text-lg text-right font-semibold">Login | Other options</p>
                 </header>
               <main className="flex-1 overflow-auto w-full bg-gray-200 text-center">

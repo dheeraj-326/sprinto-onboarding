@@ -6,8 +6,9 @@ export default function Home() {
   
 
   return (
-    <div className="block">
-      <p className="text-4xl">Books CRUD</p>
+    <div className="flex-col flex items-center justify-center">
+      
+      <div className="invisible h-[10vh]"></div>
       <BookList/>
     </div>
   );

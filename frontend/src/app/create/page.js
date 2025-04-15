@@ -1,3 +1,8 @@
+import CreateBookForm from "@/components/CreateBookForm";
+
 export default function Create() {
-    return <p className="text-4xl">Create book page</p>
+    return <div className='flex flex-col items-center justify-center'>
+        <div className="invisible h-[10vh]"></div>
+        <CreateBookForm />
+    </div>
 }
