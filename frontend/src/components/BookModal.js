@@ -1,14 +1,33 @@
+'use client';
+
+import { gql, useQuery } from '@apollo/client';
 import {
-    Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
-    Paper, Button, Dialog, DialogTitle, DialogContent, TextField, DialogActions
-  } from "@mui/material";
+    Button, Dialog,
+    DialogActions,
+    DialogContent,
+    DialogTitle,
+    FormControl,
+    MenuItem,
+    Select,
+    TextField
+} from "@mui/material";
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
-import React, { useState, useEffect } from "react";
-import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import dayjs from 'dayjs';
+import { useEffect, useState } from "react";
+import Loading from "./Loading";
+import { GET_AUTHORS } from './GqlQueries';
+
 
 export default function BookModal({ bookData, open, onClose, onSave }) {
+
+    const {
+            loading: getAuthorsLoading, 
+            error: getAuthorsError, 
+            data: getAuthorsData,
+            refetch: getAuthorsRefetch
+        } = useQuery(GET_AUTHORS);
 
     const [book, setBook] = useState({ 
         title: "", 
@@ -16,10 +35,22 @@ export default function BookModal({ bookData, open, onClose, onSave }) {
         published_date: Date.now()
      });
 
-    useEffect(() => {
-        setBook(bookData || { title: "", author: "" });
+     useEffect(() => {
+        setBook(bookData || { title: "", author_id: "" });
     }, [bookData]);
 
+     if (getAuthorsLoading)
+        return <Loading/>;
+     if (getAuthorsError)
+        throw new Error(`Error while fetching authors: ${getAuthorsError}`);
+     
+    const dropdownItems = getAuthorsData.authors.map((author) => {
+        return {
+                authorId: author.id,
+                authorName: author.name
+            };
+    });
+// https://react.dev/link/controlled-components
     const handleChange = (e) => {
         setBook({ ...book, [e.target.name]: e.target.value });
     };
@@ -30,7 +61,7 @@ export default function BookModal({ bookData, open, onClose, onSave }) {
     };
 
     return <Dialog open={open} onClose={onClose}>
-    <DialogTitle>Edit User</DialogTitle>
+    <DialogTitle>User</DialogTitle>
     <DialogContent>
       <TextField
         margin="dense"
@@ -48,15 +79,32 @@ export default function BookModal({ bookData, open, onClose, onSave }) {
         value={book?.description || ""}
         onChange={handleChange}
       />
+      <FormControl fullWidth>
       <LocalizationProvider className="flex" dateAdapter={AdapterDayjs}>
       <DatePicker
         label="Published Date"
-        value={dayjs(book.published_date)}
+        value={book.published_date ? dayjs(book.published_date) : null}
+        format="MMM D, YYYY"
         onChange={(newDate) =>
-            setBook({ ...book, published_date: newDate.toISOString() })
+            setBook({ ...book, published_date: newDate.startOf("day").toISOString() })
         }
         />
+        
         </LocalizationProvider>
+        </FormControl>
+        <FormControl fullWidth>
+        <Select
+            labelId="authorid-selector"
+            value={book.author_id || ""}
+            label="Author"
+            onChange={(e) => setBook({ ...book, author_id: e.target.value})}>
+                {dropdownItems.map((item) => (
+                <MenuItem key={item.authorId} value={item.authorId}>
+                    {item.authorName}
+                </MenuItem>
+                ))}
+        </Select>
+        </FormControl>
     </DialogContent>
     <DialogActions>
       <Button onClick={onClose}>Cancel</Button>

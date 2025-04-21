@@ -1,6 +1,9 @@
-import { Geist, Geist_Mono } from "next/font/google";
-import Link from 'next/link'
 import "@/app/globals.css";
+import { AppRouterCacheProvider } from '@mui/material-nextjs/v15-appRouter';
+import { ThemeProvider } from '@mui/material/styles';
+import theme from '../theme';
+import { Geist, Geist_Mono } from "next/font/google";
+import Link from 'next/link';
 import ApolloWrapper from '../lib/ApolloProvider';
 
 const geistSans = Geist({
@@ -21,7 +24,7 @@ export const metadata = {
 export default function RootLayout({ children }) {
   const navItems = {
     "Home": "/",
-    "Add Book": "/create",
+    // "Add Book": "/create",
   }
 
   return (
@@ -29,14 +32,16 @@ export default function RootLayout({ children }) {
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
+        <AppRouterCacheProvider>
+        <ThemeProvider theme={theme}>
         <ApolloWrapper>
           <div className="flex h-screen justify-center">
             <nav className="w-64 bg-gray-100 p-6 h-screen">
-              <p className="text-xl bg-gray-200 text-center p-2">Actions</p>
+              <p className="text-xl bg-gray-200 text-center p-2">Pages</p>
               <ul>
                 {
                   Object.entries(navItems).map(([label, path]) => (
-                    <Link key={label} href={path} className="block pl-4 p-1 hover:bg-gray-200 hover:underline">{label}</Link>
+                    <Link key={label} href={path} className="block pl-4 p-1 hover:bg-gray-200">{label}</Link>
                   ))
                 }
               </ul>
@@ -55,6 +60,8 @@ export default function RootLayout({ children }) {
             </div>
           </div>
       </ApolloWrapper>
+      </ThemeProvider>
+      </AppRouterCacheProvider>
       </body>
     </html>
   );

@@ -11,10 +11,11 @@
   "dependencies": {
     "@apollo/client": "^3.13.7",
     "@apollo/client-devtools-vscode": "^4.19.13",
-    "@emotion/react": "^11.14.0",
+    "@emotion/cache": "^11.14.0",
     "@emotion/styled": "^11.14.0",
     "@mui/icons-material": "^7.0.2",
     "@mui/material": "^7.0.2",
+    "@mui/material-nextjs": "^7.0.2",
     "@mui/x-date-pickers": "^7.28.3",
     "dayjs": "^1.11.13",
     "graphql": "^16.10.0",
@@ -25,8 +26,10 @@
   "devDependencies": {
     "@eslint/eslintrc": "^3",
     "@tailwindcss/postcss": "^4",
-    "eslint": "^9",
+    "eslint": "^9.24.0",
     "eslint-config-next": "15.3.0",
+    "eslint-config-prettier": "^10.1.2",
+    "prettier": "^3.5.3",
     "tailwindcss": "^4"
   }
 }
