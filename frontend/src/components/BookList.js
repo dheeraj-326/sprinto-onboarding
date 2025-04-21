@@ -7,16 +7,17 @@ import {
     Pagination,
     Paper,
     Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
-    TextField
+    TextField, Stack
 } from "@mui/material";
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import dayjs from "dayjs";
 import { useState, useEffect } from "react";
 import BookModal from "./BookModal";
 import Error from './Error';
 import Loading from './Loading';
 import { CREATE_BOOK, DELETE_BOOK, EDIT_BOOK, GET_BOOKS } from './GqlQueries';
-
-
+import { LocalizationProvider } from '@mui/x-date-pickers';
 
 
 export default function BookList() {
@@ -25,48 +26,53 @@ export default function BookList() {
     const [totalPages, setTotalPages] = useState(0);
     const [booksFilter, setBooksFilter] = useState({
         title: "",
-        authorId: undefined,
+        authorId: null,
         description: "",
-        publishedBefore: undefined,
-        publishedAfter: undefined,
-        limit: undefined,
-        offset: undefined,
+        publishedBefore: null,
+        publishedAfter: null,
+        limit: null,
+        offset: null,
     });
 
     const [displayData, setDisplayData] = useState([]);
+    const [publishedAfter, setPublishedAfter] = useState(null);
+    const [publishedBefore, setPublishedBefore] = useState(null);
 
-    
 
     const {
         loading: getBooksLoading,
         error: getBooksError,
         data: getBooksData,
         refetch: getBooksRefetch
-    } = useQuery(GET_BOOKS, { 
+    } = useQuery(GET_BOOKS, {
         variables: booksFilter,
         onCompleted: (data) => {
             applyPagination(data);
-          },
-          onError: (err) => {
-            console.error("❌ Query error:", err);
-          }
-     });
+        },
+        onError: (err) => {
+            console.error("Query error:", err);
+        }
+    });
     const [modalOpen, setModalOpen] = useState(false);
     const [editBook, setEditBook] = useState(null);
 
     const applyPagination = async (data) => {
         setTotalPages(Math.ceil(data.books.length / pageSize));
         let [begin, end] = [(pageNumber - 1) * pageSize, (pageNumber * pageSize)];
-        console.log(`Begin: ${begin}, End: ${end}`);
         end = end > data.books.length * pageSize ? data.books.length * pageSize : end;
         const tempData = data.books.slice(begin, end);
-        console.log(tempData);
         setDisplayData(tempData);
     };
 
     useEffect(() => {
-        applyPagination(getBooksData);
-    }, [pageNumber])
+        if (!getBooksLoading && getBooksData) {
+            let updatedTotalPages = Math.ceil(getBooksData.books.length / pageSize);
+            setTotalPages(updatedTotalPages);
+            if (pageNumber > updatedTotalPages)
+                editPageNumber(updatedTotalPages);
+            applyPagination(getBooksData);
+        }
+    }, [pageNumber, getBooksLoading, getBooksData])
 
     useEffect(() => {
         getBooksRefetch(booksFilter)
@@ -125,10 +131,6 @@ export default function BookList() {
         return;
     };
 
-    const changePageSize = async () => {
-
-    }
-
     const handleDelete = async (id) => {
         await deleteBookMutation({
             variables: {
@@ -160,6 +162,47 @@ export default function BookList() {
                     value={booksFilter?.description}
                     onChange={handleFilterChange}
                 />
+                <LocalizationProvider dateAdapter={AdapterDayjs}
+                >
+                    <div className="flex flex-col justify-center pt-1.5">
+                        <DatePicker
+                            label="Published After"
+                            value={booksFilter.publishedAfter}
+                            name="publishedAfter"
+                            onChange={(newValue) => {
+                                let [publishedBefore, publishedAfter] = [booksFilter.publishedBefore, booksFilter.publishedAfter];
+                                publishedAfter = newValue;
+                                if (booksFilter.publishedBefore && newValue && newValue > booksFilter.publishedBefore) {
+                                    publishedBefore = null;
+                                }
+                                let newFilter = {
+                                    ...booksFilter,
+                                    publishedAfter: publishedAfter,
+                                    publishedBefore: publishedBefore
+                                }
+                                setBooksFilter(newFilter)
+                            }}
+                            maxDate={publishedBefore}
+                            renderInput={(params) => <TextField {...params} />}
+                        />
+                    </div>
+                    <div className="flex justify-center flex-col pt-1.5">
+                        <DatePicker
+                            label="Published Before"
+                            name="publishedBefore"
+                            value={booksFilter.publishedBefore}
+                            onChange={(newValue) => {
+                                let newFilter = {
+                                    ...booksFilter,
+                                    publishedBefore: newValue
+                                }
+                                setBooksFilter(newFilter)
+                            }}
+                            minDate={publishedAfter}
+                            renderInput={(params) => <TextField {...params} />}
+                        />
+                    </div>
+                </LocalizationProvider>
             </div>
         </div>
         <div className="flex w-full ">
@@ -211,8 +254,8 @@ export default function BookList() {
                 display: 'flex',
                 justifyContent: 'center',
                 marginTop: 2,  // Optional: adds some spacing at the top
-              }}
-            />
+            }}
+        />
         <BookModal
             open={modalOpen}
             onClose={() => setModalOpen(false)}
