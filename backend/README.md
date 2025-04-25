@@ -79,6 +79,7 @@ http://localhost:4001/graphql
 
 ## Available Scripts
 
+- `npm run postgres` - Start postgres in docker
 - `npm start` - Start the server in production mode
 - `npm run dev` - Start the server in development mode with hot-reloading
 - `npm test` - Run tests (if configured)
